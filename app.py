@@ -263,7 +263,7 @@ with st.container():
             "icon": """<div class="preset-icon">
                 <i class="bi bi-calendar-check" style="font-size: 2.25rem; color: #1E1E1E;"></i>
             </div>""",
-            "text": "Give me my 30-day health report"
+            "text": "summarise my 30-day health report"
         },
         {
             "icon": """<div class="preset-icon">

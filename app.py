@@ -344,13 +344,14 @@ if not userId:
 def fetch_user_data(userId):
     url = "https://mds.qa.continuumcare.ai/api/llm/data"
     params = {
-        "userId": userId,
+        "user_id": userId,   # ✅ FIXED
         "page": 1,
         "size": 200
     }
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
     return r.json()
+
 if "user_data" not in st.session_state:
     with st.spinner("Loading your health data..."):
         st.session_state.user_data = fetch_user_data(userId)

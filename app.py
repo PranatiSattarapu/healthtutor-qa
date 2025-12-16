@@ -1,102 +1,15 @@
-
-
-# # import streamlit as st
-# # from drive_manager import list_data_files
-# # from workflow import generate_response
-
-# # # --- Streamlit Configuration ---
-# # st.set_page_config(page_title="Health Tutor Console", layout="wide")
-# # st.title("Prompt Refinement Console")
-
-# # # --- Initialize Session State ---
-# # if "sessions" not in st.session_state:
-# #     st.session_state.sessions = {"Session 1": []}
-# # if "current_session" not in st.session_state:
-# #     st.session_state.current_session = "Session 1"
-
-# # # --- Sidebar: Document Management (Read-Only) ---
-# # st.sidebar.header("📂 Current Document Context")
-
-# # files = list_data_files()
-
-# # if not files:
-# #     st.sidebar.info("No documents found in the shared folder yet.")
-# # else:
-# #     st.sidebar.markdown("**Documents informing the context:**")
-# #     for f in files:
-# #         st.sidebar.markdown(f"📄 " + f["name"])
-
-# # st.divider()
-
-# # # --- Main Area: Chat Interface ---
-# # # --- Main Chat Interface ---
-
-# # active_messages = st.session_state.sessions[st.session_state.current_session]
-
-# # # 1️⃣ CHAT MESSAGES (always on top)
-# # for message in active_messages:
-# #     with st.chat_message(message["role"]):
-# #         st.markdown(message["content"])
-
-
-# # # 2️⃣ QUICK QUESTIONS (always ABOVE chat input)
-# # st.markdown("### Quick Questions")
-
-# # preset_questions = [
-# #     "Summarize health status over the last 30 days",
-# #     "What's my health summary?",
-# #     "What should I ask my doctor?",
-# #     "Summarize my recent metrics",
-# # ]
-
-# # cols = st.columns(len(preset_questions))
-
-# # if "preset_query" not in st.session_state:
-# #     st.session_state.preset_query = None
-
-# # for i, q in enumerate(preset_questions):
-# #     if cols[i].button(q, key=f"preset_{i}"):
-# #         st.session_state.preset_query = q
-# #         st.rerun()
-
-
-# # # 3️⃣ CHAT INPUT (always at the bottom)
-# # chat_input = st.chat_input("Enter your medical question:")
-
-# # # Decide final query
-# # query = None
-# # if st.session_state.preset_query:
-# #     query = st.session_state.preset_query
-# #     st.session_state.preset_query = None
-# # elif chat_input:
-# #     query = chat_input
-
-
-# # # 4️⃣ PROCESS QUERY
-# # if query:
-# #     active_messages.append({"role": "user", "content": query})
-
-# #     with st.chat_message("user"):
-# #         st.markdown(query)
-
-# #     with st.chat_message("assistant"):
-# #         with st.spinner("Claude is thinking..."):
-# #             answer = generate_response(query)
-
-# #         st.markdown(answer)
-
-# #     active_messages.append({"role": "assistant", "content": answer})
-# #     st.session_state.sessions[st.session_state.current_session] = active_messages
-
-
 import streamlit as st
+from drive_manager import list_data_files
 from workflow import generate_response
 from datetime import datetime
+
+
 
 # --- Streamlit Configuration ---
 st.set_page_config(page_title="Health Tutor Console", layout="wide")
 
-# --- Custom CSS ---
+# --- Custom CSS for Right Panel ---
+# --- Custom CSS (merged theme) ---
 # Add Bootstrap Icons CDN
 st.markdown("""
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -126,7 +39,7 @@ st.markdown("""
     }
 
     .stMain {
-        padding-right: 20vw;
+        padding-right: 0;
     }
     
     .stMainBlockContainer {
@@ -139,7 +52,6 @@ st.markdown("""
         padding: 2rem 3rem;
         border-radius: 10px;
         margin: 1rem;
-        margin-right: 20vw;
     }
     
     .greeting-header {
@@ -231,116 +143,37 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
-    .right-sidebar {
-        background-color: #dceaf7;
-        padding: 2rem 1.5rem;
-        border-radius: 10px;
-        min-height: 100vh;
-    }
-
     .stAppHeader {
-        display: none;
-    }
-    
-    /* Apply background to the entire right column container */
-    .element-container:has(.right-sidebar) {
-        background-color: #dceaf7 !important;
+    display: none;
     }
     .stHorizontalBlock {
-        align-items:center;
-        justify-content:between;
-    }
-    
-    /* Force all normal text in the main content to be black */
-    div[data-testid="stVerticalBlock"] * {
-        color: #1E1E1E !important;
-    }
-
-    /* Fix gray text inside preset buttons */
-    .stButton > button {
-        color: #1E1E1E !important;
-    }
-
-    /* Fix chat bubbles text */
-    .stChatMessageContent p, .stChatMessageContent div {
-        color: #1E1E1E !important;
-    }
-    
-    /* Right panel styling */
-    .right-panel {
-        position: fixed;
-        top: 0px; 
-        right: 0px;
-        width: 25vw;
-        background: #dceaf7;
-        padding: 2rem 1.5rem;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .right-panel .alert-section {
-        background-color: #dceaf7;
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: start;
-        margin-bottom: 3rem;
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: start;
-        gap: 1rem;
-    }
-
-    .right-panel .alert-icon {
-        font-size: 3rem;
-        margin-bottom: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .right-panel .alert-icon i {
-        font-size: 2rem;
-        color: #1E1E1E;
-    }
-
-    .right-panel .alert-count {
-        font-size: 2rem;
-        color: red !important;
-        font-weight: normal;
-    }
-
-    .right-panel .action-icon {
-        font-size: 2rem;
-        flex-shrink: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .right-panel .action-icon i {
-        font-size: 2rem;
-        color: #1E1E1E;
-    }
-
-    .right-panel .action-item {
-        background-color: #dceaf7;
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: left;
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        align-items: start;
-        justify-content: start;
-        gap: 1rem;
+            align-items:center;
+            justify-content:between;
     }
 </style>
 """, unsafe_allow_html=True)
+st.markdown("""
+<style>
+/* Force all normal text in the main content to be black */
+div[data-testid="stVerticalBlock"] * {
+    color: #1E1E1E !important;
+}
+
+/* Fix gray text inside preset buttons */
+.stButton > button {
+    color: #1E1E1E !important;
+}
+
+/* Fix chat bubbles text */
+.stChatMessageContent p, .stChatMessageContent div {
+    color: #1E1E1E !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+
+# st.title("Prompt Refinement Console")
 
 # --- Initialize Session State ---
 if "sessions" not in st.session_state:
@@ -352,7 +185,23 @@ if "preset_query" not in st.session_state:
 if "show_chat" not in st.session_state:
     st.session_state.show_chat = False
 
-# --- Sidebar: Chat History ---
+
+# --- Sidebar: Document Management (Read-Only) ---
+# st.sidebar.header("📂 Current Document Context")
+# if st.sidebar.button("🔍 Test Patient Data API"):
+#     from workflow import fetch_patient_data
+#     data = fetch_patient_data()
+#     st.sidebar.write("API Returned:")
+#     st.sidebar.json(data)
+
+# files = list_data_files()
+
+# if not files:
+#     st.sidebar.info("No documents found in the shared folder yet.")
+# else:
+#     st.sidebar.markdown("**Documents informing the context:**")
+#     for f in files:
+#         st.sidebar.markdown(f"📄 " + f["name"])
 with st.sidebar:
     st.markdown("""
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
@@ -380,36 +229,41 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# --- Main Layout: Chat + Right Panel ---
-main_col, right_col = st.columns([8, 2])
 
-with main_col:
-    # Greeting + Date
+# st.divider()
+
+# --- Main Layout: Chat + Right Panel ---
+# Greeting + Date
+
+with st.container():
+
+    # Greeting + Date (THIS GOES HERE)
     today = datetime.now().strftime("%B %d, %Y")
     st.markdown(
-        f"""
-        <div style='text-align: left; margin-bottom: 3rem;'>
-            <h2 style='color: black; margin-bottom: 5px; font-size: 2.5rem;'>Hello!</h2>
-            <p style='font-size: 1.25rem; color: gray;'>{today}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    f"""
+    <div style='text-align: left; margin-bottom: 3rem;'>
+        <h2 style='color: black; margin-bottom: 5px; font-size: 2.5rem;'>Hello!</h2>
+        <p style='font-size: 1.25rem; color: gray;'>{today}</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-    # Display chat messages
+
+
     active_messages = st.session_state.sessions[st.session_state.current_session]
 
     for message in active_messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Preset questions
+
     preset_questions = [
         {
             "icon": """<div class="preset-icon">
                 <i class="bi bi-calendar-check" style="font-size: 2.25rem; color: #1E1E1E;"></i>
             </div>""",
-            "text": "Summarize health status over the last 30 days"
+            "text": "Give me my 30-day health report"
         },
         {
             "icon": """<div class="preset-icon">
@@ -430,12 +284,15 @@ with main_col:
             "text": "Explain my alerts"
         },
     ]
+    if "preset_query" not in st.session_state:
+        st.session_state.preset_query = None
 
-    # Display preset buttons
+    # Center the buttons using columns
     left_col = st.container()
 
     with left_col:
         for i, q in enumerate(preset_questions):
+            # Use columns to create a button-like layout with SVG
             btn_col1, btn_col2 = st.columns([0.05, 0.95])
             with btn_col1:
                 st.markdown(f'<div style="display: flex; align-items: start; justify-content: start; height: 100%;">{q["icon"]}</div>', unsafe_allow_html=True)
@@ -444,7 +301,8 @@ with main_col:
                     st.session_state.preset_query = q["text"]
                     st.rerun()
 
-    # Process query
+
+    # Decide final query
     query = None
     if st.session_state.preset_query:
         query = st.session_state.preset_query
@@ -458,40 +316,10 @@ with main_col:
             st.markdown(query)
 
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner("Claude is thinking..."):
                 answer = generate_response(query)
 
             st.markdown(answer)
 
         active_messages.append({"role": "assistant", "content": answer})
         st.session_state.sessions[st.session_state.current_session] = active_messages
-
-# Right panel HTML (fixed position)
-st.markdown("""
-<div class="right-panel">
-    <div class="alert-section">
-        <div class="alert-icon" style="position: relative;">
-            <i class="bi bi-bell-fill" style="font-size: 2rem; color: #1E1E1E;"></i>
-        </div>
-        <div class="alert-count">2 Alerts</div>
-    </div>
-    <div class="action-item">
-        <div class="action-icon">
-            <i class="bi bi-share" style="font-size: 2rem; color: #1E1E1E;"></i>
-        </div>
-        <span style="font-size: 1.5rem; color: #1E1E1E; font-weight: normal; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">Share with Carepod</span>
-    </div>
-   <div class="action-item">
-        <div class="action-icon">
-            <i class="bi bi-camera" style="font-size: 2rem; color: #1E1E1E;"></i>
-        </div>
-        <span style="font-size: 1.5rem; color: #1E1E1E; font-weight: normal; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">Add Health Photos</span>
-    </div>
-   <div class="action-item">
-        <div class="action-icon">
-            <i class="bi bi-graph-up" style="font-size: 2rem; color: #1E1E1E;"></i>
-        </div>
-        <span style="font-size: 1.5rem; color: #1E1E1E; font-weight: normal; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">View Dashboard</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)

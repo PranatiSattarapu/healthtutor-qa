@@ -1,0 +1,15 @@
+streamlit
+anthropic
+google-api-python-client
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+python-docx
+rapidfuzz
+google-genai>=1.54.0
+
+
+
+
+
+

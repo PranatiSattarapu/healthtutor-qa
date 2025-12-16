@@ -336,15 +336,15 @@ from datetime import datetime
 st.set_page_config(page_title="Health Tutor Console", layout="wide")
  
 #--------------User data fetching-------------
-user_id = st.query_params.get("user_id")
+userId = st.query_params.get("userId")
  
-if not user_id:
+if not userId:
     st.error("User not identified. Please access chatbot via the dashboard.")
     st.stop()
-def fetch_user_data(user_id):
+def fetch_user_data(userId):
     url = "https://mds.qa.continuumcare.ai/api/llm/data"
     params = {
-        "user_id": user_id,
+        "userId": userId,
         "page": 1,
         "size": 200
     }
@@ -353,7 +353,7 @@ def fetch_user_data(user_id):
     return r.json()
 if "user_data" not in st.session_state:
     with st.spinner("Loading your health data..."):
-        st.session_state.user_data = fetch_user_data(user_id)
+        st.session_state.user_data = fetch_user_data(userId)
  
 #------------------------------------
 # --- Streamlit Configuration ---

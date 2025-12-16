@@ -269,7 +269,7 @@ with st.container():
             "icon": """<div class="preset-icon">
                 <i class="bi bi-hospital" style="font-size: 2.25rem; color: #1E1E1E;"></i>
             </div>""",
-            "text": "Help me prepare for my Care Provider visit"
+            "text": "Help me prepare for my Care Providers visit"
         },
         {
             "icon": """<div class="preset-icon">

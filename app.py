@@ -354,6 +354,13 @@ def fetch_user_data(userId):
 if "user_data" not in st.session_state:
     with st.spinner("Loading your health data..."):
         st.session_state.user_data = fetch_user_data(userId)
+     # 🔍 DEBUG: confirm user data access
+    with st.expander("🧪 Debug: User data access log"):
+        st.markdown(f"""
+        **User ID:** `{userId}`  
+        **Fetched at:** `{datetime.now().isoformat()}`  
+        **Records returned:** `{len(st.session_state.user_data.get("items", []))}`
+        """)
  
 #------------------------------------
 # --- Streamlit Configuration ---

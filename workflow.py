@@ -833,29 +833,60 @@ claude = Anthropic(api_key=CLAUDE_API_KEY)
  
 # Define your File Search Store name (The ID you got from the indexing script)
 def normalize_user_data(api_data):
-   
-    items = api_data["items"]  # this SHOULD exist; fail loudly if not
+    """
+    Normalizes both:
+    - Old MDS API response
+    - New S3 synthetic JSON response
+    into flat, LLM-readable text.
+    """
+
+    # --- STEP 1: Locate items safely ---
+    if "items" in api_data:
+        items = api_data["items"]                      # old MDS
+    elif "records" in api_data and "items" in api_data["records"]:
+        items = api_data["records"]["items"]           # S3 synthetic
+    else:
+        return "No patient health records available."
+
     lines = []
- 
+
     for item in items:
-        record_date = item["recordDate"]
         source = item.get("source", "unknown")
- 
+
+        # fallback date resolution
+        record_date = (
+            item.get("recordDate")
+            or item.get("originalRecordDate")
+            or "unknown date"
+        )
+
+        # --- STEP 2: Extract report arrays ---
         for key, value in item.items():
             if key.endswith("Reports") and isinstance(value, list) and value:
+
                 for report in value:
                     clean_report = {
                         k: v for k, v in report.items()
-                        if v is not None and k not in ("id", "createdBy", "createdOn")
+                        if v is not None
+                        and k not in ("id", "createdBy", "createdOn")
                     }
+
+                    # Skip empty reports defensively
+                    if not clean_report:
+                        continue
+
                     lines.append(
-                        f"{key} on {record_date} ({source}): {clean_report}"
+                        f"{key.replace('Reports','').upper()} | "
+                        f"Date: {record_date} | "
+                        f"Source: {source} | "
+                        f"Values: {clean_report}"
                     )
- 
+
     if not lines:
         return "No patient health records available."
- 
+
     return "\n".join(lines)
+
  
 PATIENT_DATA_FOLDER = "user_data"
 GUIDELINE_MAP = {
